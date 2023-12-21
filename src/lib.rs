@@ -1,4 +1,7 @@
+mod error;
 mod pb;
+mod storage;
+pub use error::KvError;
 pub use pb::abi::*;
 
 pub fn add(left: usize, right: usize) -> usize {
