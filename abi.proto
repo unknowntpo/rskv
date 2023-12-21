@@ -1,0 +1,100 @@
+syntax = "proto3";
+
+package abi;
+
+// Request from client
+message CommandRequest {
+  oneof request_data {
+    Hget hget = 1;
+    Hgetall hgetall = 2;
+    Hmget hmget = 3;
+    Hset hset = 4;
+    Hmset hmset = 5;
+    Hdel hdel = 6;
+    Hmdel hmdel = 7;
+    Hexist hexist = 8;
+    Hmexist hmexist = 9;
+  }
+}
+
+// Response from server
+message CommandResponse {
+  // Status code: reuse HTTP 2xx/4xx/5xx
+  uint32 status = 1;
+  // if it's not 2xx, message should contain detail info
+  string message = 2;
+  // values that are successfully returned
+  repeated Value values = 3;
+  // kvpair that are successfully returned
+  repeated Kvpair pairs = 4;
+}
+
+// get a key from table, and return value
+message Hget {
+  string table = 1;
+  string key = 2;
+}
+
+// get all kvpair from table
+message Hgetall { string table = 1; }
+
+// get a key from table, and return its value
+message Hmget {
+  string table = 1;
+  repeated string keys = 2;
+}
+
+// return value
+message Value {
+  oneof value {
+    string string = 1;
+    bytes binary = 2;
+    int64 integer = 3;
+    double float = 4;
+    bool bool = 5;
+  }
+}
+
+// returned kvpair
+message Kvpair {
+  string key = 1;
+  Value value = 2;
+}
+
+// store a kvpair to table
+// if table doesn't exist, create one.
+message Hset {
+  string table = 1;
+  Kvpair pair = 2;
+}
+
+// store kvpairs to table
+// if table doesn't exist, create one.
+message Hmset {
+  string table = 1;
+  repeated Kvpair pairs = 2;
+}
+
+// delete a key from table, return its previous value 
+message Hdel {
+  string table = 1;
+  string key = 2;
+}
+
+// delete a set of keys, return their values 
+message Hmdel {
+  string table = 1;
+  repeated string keys = 2;
+}
+
+// check if key exist in table
+message Hexist {
+  string table = 1;
+  string key = 2;
+}
+
+// check if keys exists in table
+message Hmexist {
+  string table = 1;
+  repeated string keys = 2;
+}
