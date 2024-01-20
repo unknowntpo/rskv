@@ -40,7 +40,7 @@ use tracing::info;
 async fn main() -> Result<()> {
     tracing_subscriber::fmt::init();
 
-    let addr = "127.0.0.1:9527";
+    let addr = "127.0.0.1:9000";
     let stream = TcpStream::connect(addr).await?;
 
     let mut client =

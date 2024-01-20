@@ -5,10 +5,29 @@ use rskv::{CommandRequest, CommandResponse, MemTable, Service};
 use tokio::net::TcpListener;
 use tracing::info;
 
+use pyroscope::PyroscopeAgent;
+use pyroscope_pprofrs::*;
+
+fn complex() {
+    // Your complex function implementation goes here
+    println!("difficult");
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
+    std::env::set_var("RUST_LOG", "trace");
+
     tracing_subscriber::fmt::init();
-    let addr = "127.0.0.1:9527";
+
+    let agent = PyroscopeAgent::builder("http://127.0.0.1:4040", "rust-app")
+        .backend(pprof_backend(PprofConfig::new().sample_rate(100)))
+        .tags(vec![("Hostname", "pyroscope")])
+        .build()
+        .unwrap();
+
+    let agent_running = agent.start().unwrap();
+
+    let addr = "127.0.0.1:9000";
     let listener = TcpListener::bind(addr).await?;
     let svc = Service::new(MemTable::new());
     info!("Start listening on {}", addr);
@@ -28,4 +47,7 @@ async fn main() -> Result<()> {
             info!("Client {:?} disconnected", addr);
         });
     }
+
+    agent_running.stop();
+    agent_running.shutdown();
 }
